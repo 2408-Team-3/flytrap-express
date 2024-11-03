@@ -22,7 +22,7 @@ class Flytrap {
   }
 
   private handleUncaughtException(e: Error): void {
-    if (e.error instanceof FlytrapError) return;
+    if (e instanceof FlytrapError) return;
     this.logError(e, false);
     // process.exit(1); // Uncomment if needed
   }
