@@ -21,6 +21,19 @@ export default class Flytrap {
   }
 
   public setUpExpressErrorHandler(app: Application): void {
+    const asyncWrapper = (fn: (req: Request, res: Response, next: NextFunction) => Promise<any>) => 
+      (req: Request, res: Response, next: NextFunction) => {
+        Promise.resolve(fn(req, res, next)).catch(next);
+      };
+
+    app._router.stack.forEach((layer: any) => {
+      if (layer.route) {
+        layer.route.stack.forEach((handler: any) => {
+          handler.handle = asyncWrapper(handler.handle);
+        });
+      }
+    });
+    
     app.use((e: any, req: Request, res: Response, next: NextFunction) => {
       if (e instanceof Error) {
         this.logError(e, false);
