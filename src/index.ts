@@ -1,4 +1,5 @@
 import axios from "axios";
+import express, { Application, Request, Response, NextFunction } from 'express';
 import { FlytrapError } from "./utils/FlytrapError";
 import { LogData, RejectionValue } from "./types/types";
 import { responseSchema } from "./types/schemas";
@@ -17,6 +18,35 @@ export default class Flytrap {
     this.projectId = config.projectId;
     this.apiEndpoint = config.apiEndpoint;
     this.apiKey = config.apiKey;
+  }
+
+  public setUpExpressErrorHandler(app: Application): void {
+    const asyncWrapper = (fn: (req: Request, res: Response, next: NextFunction) => Promise<any>) => 
+      (req: Request, res: Response, next: NextFunction) => {
+        Promise.resolve(fn(req, res, next)).catch(next);
+      };
+
+    app._router.stack.forEach((layer: any) => {
+      if (layer.route) {
+        layer.route.stack.forEach((handler: any) => {
+          handler.handle = asyncWrapper(handler.handle);
+        });
+      }
+    });
+    
+    app.use((e: any, req: Request, res: Response, next: NextFunction) => {
+      if (e instanceof Error) {
+        this.logError(e, false);
+      } else {
+        this.logRejection(e, false);
+      }
+
+      next(e);
+    });
+  }
+
+  public captureException(e: Error): void {
+    this.logError(e, true);
   }
 
   // * --- Private Methods --- * //
