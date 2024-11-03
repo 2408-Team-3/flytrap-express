@@ -24,8 +24,8 @@ export default class Flytrap {
     process.on("uncaughtException", (e: Error) =>
       this.handleUncaughtException(e),
     );
-    process.on("unhandledRejection", (reason: Error | RejectionValue, promise: Promise<any>) =>
-      this.handleUnhandledRejection(reason, promise),
+    process.on("unhandledRejection", (reason: Error | RejectionValue) =>
+      this.handleUnhandledRejection(reason),
     );
   }
 
@@ -35,7 +35,7 @@ export default class Flytrap {
     // process.exit(1); // Uncomment if needed
   }
 
-  private handleUnhandledRejection(reason: Error | RejectionValue, promise: Promise<any>): void {
+  private handleUnhandledRejection(reason: Error | RejectionValue): void {
     if (reason instanceof Error) {
       if (reason instanceof FlytrapError) return;
       this.logError(reason, false);
