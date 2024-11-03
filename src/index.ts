@@ -19,6 +19,10 @@ export default class Flytrap {
     this.apiKey = config.apiKey;
   }
 
+  public captureException(e: Error): void {
+    this.logError(e, true);
+  }
+
   // * --- Private Methods --- * //
   private setUpGlobalErrorHandlers(): void {
     process.on("uncaughtException", (e: Error) =>
