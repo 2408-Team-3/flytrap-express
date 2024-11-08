@@ -1,5 +1,5 @@
 import axios from "axios";
-import express, { Application, Request, Response, NextFunction } from 'express';
+import { Application, Request, Response, NextFunction } from 'express';
 import { FlytrapError } from "./utils/FlytrapError";
 import { LogData, RejectionValue } from "./types/types";
 import { responseSchema } from "./types/schemas";
@@ -18,6 +18,7 @@ export default class Flytrap {
     this.projectId = config.projectId;
     this.apiEndpoint = config.apiEndpoint;
     this.apiKey = config.apiKey;
+    this.setUpGlobalErrorHandlers();
   }
 
   public setUpExpressErrorHandler(app: Application): void {
