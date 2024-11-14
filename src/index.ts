@@ -8,6 +8,7 @@ export default class Flytrap {
   private projectId: string;
   private apiEndpoint: string;
   private apiKey: string;
+  private loggedErrors: WeakSet<Error>;
 
   constructor(config: {
     projectId: string;
@@ -17,6 +18,7 @@ export default class Flytrap {
     this.projectId = config.projectId;
     this.apiEndpoint = config.apiEndpoint;
     this.apiKey = config.apiKey;
+    this.loggedErrors = new WeakSet();
     this.setUpGlobalErrorHandlers();
   }
 
@@ -38,7 +40,9 @@ export default class Flytrap {
     
     app.use((e: Error | RejectionValue, req: Request, res: Response, next: NextFunction) => {
       if (e instanceof Error) {
-        this.logError(e, false);
+        if (!this.loggedErrors.has(e)) {
+          this.logError(e, false);
+        }
       } else {
         this.logRejection(e, false);
       }
@@ -49,6 +53,7 @@ export default class Flytrap {
 
   public captureException(e: Error): void {
     this.logError(e, true);
+    this.loggedErrors.add(e);
   }
 
   // * --- Private Methods --- * //
