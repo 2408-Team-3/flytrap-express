@@ -2,8 +2,7 @@ import axios from "axios";
 import { Application, Request, Response, NextFunction } from 'express';
 import { FlytrapError } from "./utils/FlytrapError";
 import { LogData, RejectionValue } from "./types/types";
-import { responseSchema } from "./types/schemas";
-import { ZodError } from "zod";
+import { ILayer } from 'express-serve-static-core';
 
 export default class Flytrap {
   private projectId: string;
@@ -21,21 +20,23 @@ export default class Flytrap {
     this.setUpGlobalErrorHandlers();
   }
 
-  public setUpExpressErrorHandler(app: Application): void {
-    const asyncWrapper = (fn: (req: Request, res: Response, next: NextFunction) => Promise<any>) => 
-      (req: Request, res: Response, next: NextFunction) => {
-        Promise.resolve(fn(req, res, next)).catch(next);
-      };
+  public setUpExpressErrorHandler(app: Application, wrapAsync: boolean = true): void {
+    if (wrapAsync) {
+      const asyncWrapper = (fn: (req: Request, res: Response, next: NextFunction) => Promise<void>) => 
+        (req: Request, res: Response, next: NextFunction) => {
+          Promise.resolve(fn(req, res, next)).catch(next);
+        };
 
-    app._router.stack.forEach((layer: any) => {
-      if (layer.route) {
-        layer.route.stack.forEach((handler: any) => {
-          handler.handle = asyncWrapper(handler.handle);
-        });
-      }
-    });
+      app._router.stack.forEach((layer: ILayer) => {
+        if (layer.route) {
+          layer.route.stack.forEach((handler: ILayer) => {
+            handler.handle = asyncWrapper(handler.handle);
+          });
+        }
+      });
+    }
     
-    app.use((e: any, req: Request, res: Response, next: NextFunction) => {
+    app.use((e: Error | RejectionValue, req: Request, res: Response, next: NextFunction) => {
       if (e instanceof Error) {
         this.logError(e, false);
       } else {
@@ -98,18 +99,13 @@ export default class Flytrap {
         { headers: { "x-api-key": this.apiKey } },
       );
 
-      responseSchema.parse(response);
       console.log("[flytrap]", response.status, response.data);
     } catch (e) {
-      if (e instanceof ZodError) {
-        console.error("[flytrap] Response validation error:", e.errors);
-      } else {
-        console.error("[flytrap] An error occured sending error data.", e);
-        throw new FlytrapError(
-          "An error occurred logging error data.",
-          e instanceof Error ? e : new Error(String(e)),
-        );
-      }
+      console.error("[flytrap] An error occured sending error data.", e);
+      throw new FlytrapError(
+        "An error occurred logging error data.",
+        e instanceof Error ? e : new Error(String(e)),
+      );
     }
   }
 
@@ -132,21 +128,13 @@ export default class Flytrap {
         { headers: { "x-api-key": this.apiKey } },
       );
 
-      responseSchema.parse(response);
       console.log("[flytrap]", response.status, response.data);
     } catch (e) {
-      if (e instanceof ZodError) {
-        console.error("[flytrap] Response validation error:", e.errors);
-      } else {
-        console.error(
-          "[error sdk] An error occurred sending rejection data.",
-          e,
-        );
-        throw new FlytrapError(
-          "An error occurred logging rejection data.",
-          e instanceof Error ? e : new Error(String(e)),
-        );
-      }
+      console.error("[flytrap] An error occurred sending rejection data.", e);
+      throw new FlytrapError(
+        "An error occurred logging rejection data.",
+        e instanceof Error ? e : new Error(String(e)),
+      );
     }
   }
 }
