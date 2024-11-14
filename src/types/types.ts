@@ -1,5 +1,4 @@
-export type RejectionValue = string | number | object | null;
-
+export type RejectionValue = string | number | boolean | object | null | undefined;
 export interface ErrorData {
   name: string;
   message: string;
