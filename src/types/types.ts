@@ -8,7 +8,15 @@ export interface ErrorData {
 export interface LogData {
   error?: ErrorData;
   value?: RejectionValue;
+  codeContexts?: CodeContext[];
   handled: boolean;
   timestamp: string;
   project_id: string;
+}
+
+export interface CodeContext {
+  file: string;
+  line: number;
+  column: number;
+  context: string;
 }

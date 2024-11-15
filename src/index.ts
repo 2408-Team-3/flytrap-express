@@ -1,7 +1,9 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import axios from "axios";
 import { Application, Request, Response, NextFunction } from 'express';
 import { FlytrapError } from "./utils/FlytrapError";
-import { LogData, RejectionValue } from "./types/types";
+import { LogData, RejectionValue, CodeContext } from "./types/types";
 import { ILayer } from 'express-serve-static-core';
 
 export default class Flytrap {
@@ -9,16 +11,19 @@ export default class Flytrap {
   private apiEndpoint: string;
   private apiKey: string;
   private loggedErrors: WeakSet<Error>;
+  private includeContext: boolean;
 
   constructor(config: {
     projectId: string;
     apiEndpoint: string;
     apiKey: string;
+    includeContext?: boolean;
   }) {
     this.projectId = config.projectId;
     this.apiEndpoint = config.apiEndpoint;
     this.apiKey = config.apiKey;
     this.loggedErrors = new WeakSet();
+    this.includeContext = true;
     this.setUpGlobalErrorHandlers();
   }
 
@@ -85,12 +90,37 @@ export default class Flytrap {
   private async logError(error: Error, handled: boolean): Promise<void> {
     if (!error) return;
 
+    const stackFrames = this.parseStackTrace(error.stack);
+
+    let codeContexts: CodeContext[] = [];
+    if (this.includeContext && stackFrames) {
+      const contexts = await Promise.all(
+        stackFrames.map(async (frame) => {
+          const source = await this.readSourceFile(frame.file);
+          
+          if (source) {
+            const context = this.getCodeContext(source, frame.line);
+
+            return {
+              file: frame.file,
+              line: frame.line,
+              column: frame.column,
+              context,
+            }
+          }
+          return null;
+        })
+      );
+      codeContexts = contexts.filter(Boolean) as CodeContext[];
+    }
+
     const data: LogData = {
       error: {
         name: error.name,
         message: error.message,
         stack: error.stack,
       },
+      codeContexts,
       handled,
       timestamp: new Date().toISOString(),
       project_id: this.projectId,
@@ -141,5 +171,46 @@ export default class Flytrap {
         e instanceof Error ? e : new Error(String(e)),
       );
     }
+  }
+
+  private parseStackTrace(stack: string | undefined) {
+    if (!stack) return;
+
+    const stackLines = stack.split('\n').slice(1); // Skip the error message
+    const stackFrames = stackLines.map((line) => {
+      // Regex to match stack trace lines
+      const match = line.match(/\s+at\s+(?:.*\s\()?(.+):(\d+):(\d+)\)?/);
+      if (match) {
+        const [, file, lineNumber, columnNumber] = match;
+        return {
+          file,
+          line: parseInt(lineNumber, 10),
+          column: parseInt(columnNumber, 10),
+        };
+      }
+      return null;
+    }).filter(Boolean) as { file: string; line: number; column: number }[];
+
+    console.log('[flytrap] Stack frames:');
+    console.log(stackFrames);
+    console.log('');
+    return stackFrames;
+  }
+
+  private async readSourceFile(filePath: string): Promise<string| null> {
+    try {
+      const absolutePath = path.resolve(filePath);
+      return await fs.promises.readFile(absolutePath, 'utf-8');
+    } catch (e) {
+      console.error(`[flytrap] Could not read file: ${filePath}`, e);
+      return null;
+    }
+  }
+
+  private getCodeContext(source: string, lineNumber: number, contextLines: number = 5): string {
+    const lines = source.split('\n');
+    const start = Math.max(lineNumber - contextLines - 1, 0);
+    const end = Math.min(lineNumber + contextLines, lines.length);
+    return lines.slice(start, end).join('\n');
   }
 }
