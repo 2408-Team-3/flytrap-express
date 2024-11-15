@@ -5,6 +5,7 @@ import { Application, Request, Response, NextFunction } from 'express';
 import { FlytrapError } from "./utils/FlytrapError";
 import { LogData, RejectionValue, CodeContext } from "./types/types";
 import { ILayer } from 'express-serve-static-core';
+import { fileURLToPath } from 'url';
 
 export default class Flytrap {
   private projectId: string;
@@ -74,7 +75,7 @@ export default class Flytrap {
   private handleUncaughtException(e: Error): void {
     if (e instanceof FlytrapError) return;
     this.logError(e, false);
-    // process.exit(1); // Uncomment if needed
+    throw e;
   }
 
   private handleUnhandledRejection(reason: Error | RejectionValue): void {
@@ -84,7 +85,6 @@ export default class Flytrap {
     } else {
       this.logRejection(reason, false);
     }
-    // process.exit(1); // Uncomment if needed
   }
 
   private async logError(error: Error, handled: boolean): Promise<void> {
@@ -178,7 +178,6 @@ export default class Flytrap {
 
     const stackLines = stack.split('\n').slice(1); // Skip the error message
     const stackFrames = stackLines.map((line) => {
-      // Regex to match stack trace lines
       const match = line.match(/\s+at\s+(?:.*\s\()?(.+):(\d+):(\d+)\)?/);
       if (match) {
         const [, file, lineNumber, columnNumber] = match;
@@ -189,17 +188,18 @@ export default class Flytrap {
         };
       }
       return null;
-    }).filter(Boolean) as { file: string; line: number; column: number }[];
+    })
+    .filter(Boolean)
+    .slice(0, 10) as { file: string; line: number; column: number }[];
 
-    console.log('[flytrap] Stack frames:');
-    console.log(stackFrames);
-    console.log('');
     return stackFrames;
   }
 
   private async readSourceFile(filePath: string): Promise<string| null> {
     try {
-      const absolutePath = path.resolve(filePath);
+      const absolutePath = filePath.startsWith('file://')
+        ? fileURLToPath(filePath)
+        : path.resolve(filePath);
       return await fs.promises.readFile(absolutePath, 'utf-8');
     } catch (e) {
       console.error(`[flytrap] Could not read file: ${filePath}`, e);
