@@ -47,18 +47,18 @@ export default class Flytrap {
     app.use((e: Error | RejectionValue, req: Request, res: Response, next: NextFunction) => {
       if (e instanceof Error) {
         if (!this.loggedErrors.has(e)) {
-          this.logError(e, false);
+          this.logError(e, false, req);
         }
       } else {
-        this.logRejection(e, false);
+        this.logRejection(e, false, req);
       }
 
       next(e);
     });
   }
 
-  public captureException(e: Error): void {
-    this.logError(e, true);
+  public captureException(e: Error, req?: Request): void {
+    this.logError(e, true, req);
     this.loggedErrors.add(e);
   }
 
@@ -87,7 +87,7 @@ export default class Flytrap {
     }
   }
 
-  private async logError(error: Error, handled: boolean): Promise<void> {
+  private async logError(error: Error, handled: boolean, req?: Request): Promise<void> {
     if (!error) return;
 
     const stackFrames = this.parseStackTrace(error.stack);
@@ -124,6 +124,8 @@ export default class Flytrap {
       handled,
       timestamp: new Date().toISOString(),
       project_id: this.projectId,
+      method: req ? req.method : undefined,
+      path: req? req.path : undefined
     };
 
     try {
@@ -147,12 +149,15 @@ export default class Flytrap {
   private async logRejection(
     value: RejectionValue,
     handled: boolean,
+    req?: Request
   ): Promise<void> {
     const data: LogData = {
       value,
       handled,
       timestamp: new Date().toISOString(),
       project_id: this.projectId,
+      method: req? req.method : undefined,
+      path: req ? req.path : undefined
     };
 
     try {

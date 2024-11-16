@@ -12,6 +12,8 @@ export interface LogData {
   handled: boolean;
   timestamp: string;
   project_id: string;
+  method?: string;
+  path?: string;
 }
 
 export interface CodeContext {
