@@ -4,7 +4,7 @@ import { parseStackTrace } from '../utils/stackTrace';
 import { readSourceFile } from '../utils/fileReader';
 import { getCodeContext } from '../utils/codeContext';
 import { getConfig } from '../config';
-import { FlytrapError } from '../utils/FlytrapError';
+// import { FlytrapError } from '../utils/FlytrapError';
 import { ErrorLogData, CodeContext } from '../types/types';
 
 export const logError = async (error: Error, handled: boolean, req?: Request): Promise<void> => {
@@ -56,12 +56,6 @@ export const logError = async (error: Error, handled: boolean, req?: Request): P
     });
     console.log('[flytrap]', response.status, response.data);
   } catch (e) {
-    // Do I want to throw an error here? What if it came from captureException and the 
-    // in a try/catch block and the user doesn't want the programme to stop?
-    console.error('[flytrap] Failed to send error data.', e);
-    throw new FlytrapError(
-      "An error occurred logging error data.",
-      e instanceof Error ? e : new Error(String(e)),
-    );
+    console.warn('[flytrap] Failed to send error data.', e);
   }
 }
