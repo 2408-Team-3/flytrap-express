@@ -55,10 +55,10 @@ flytrap.setUpExpressErrorHandler(app);
 This middleware will intercept any unhandled errors in your Express routes and log them to Flytrap.
 
 Optional: Disable Automatic Promise Rejection Wrapping
-By default, the Flytrap middleware will automatically wrap your asynchronous route handlers. This ensures any unhandled promise rejections are captured and logged. If you prefer not to have this behavior, pass false as an argument:
+By default, the Flytrap middleware will automatically wrap your asynchronous route handlers. This ensures any unhandled promise rejections are captured and logged. If you prefer not to have this behavior, pass `{ wrapAsync: false }` as an argument:
 
 ```javascript
-flytrap.setUpExpressErrorHandler(app, false);
+flytrap.setUpExpressErrorHandler(app, { wrapAsync: false });
 ```
 
 About wrapAsync:

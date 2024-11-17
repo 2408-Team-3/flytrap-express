@@ -5,8 +5,15 @@ import { logRejection } from '../logger/logRejection';
 import { RejectionValue } from '../types/types';
 import loggedErrors from '../shared/loggedErrors';
 
-export const setUpExpressErrorHandler = (app: Application, wrapAsync: boolean = true): void => {
-  if (wrapAsync) {
+interface ExpressErrorHandlerConfig {
+  wrapAsync?: boolean;
+}
+
+export const setUpExpressErrorHandler = (
+  app: Application,
+  config: ExpressErrorHandlerConfig = { wrapAsync: true }
+): void => {
+  if (config.wrapAsync) {
     const asyncWrapper = (fn: (req: Request, res: Response, next: NextFunction) => Promise<void>) =>
       (req: Request, res: Response, next: NextFunction) => {
         Promise.resolve(fn(req, res, next)).catch(next);
