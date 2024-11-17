@@ -9,18 +9,19 @@ export const setUpGlobalErrorHandlers = (): void => {
   if (globalHandlersSet) return;
   globalHandlersSet = true;
 
-  process.on('uncaughtException', (error: Error) => {
+  process.on('uncaughtException', async (error: Error) => {
     if (error instanceof FlytrapError) return;
-    logError(error, false);
+    await logError(error, false);
     throw error;
   });
 
-  process.on('unhandledRejection', (reason: Error | RejectionValue) => {
+  process.on('unhandledRejection', async (reason: Error | RejectionValue) => {
     if (reason instanceof Error) {
       if (reason instanceof FlytrapError) return;
-      logError(reason, false);
+      await logError(reason, false);
     } else {
-      logRejection(reason, false);
+      await logRejection(reason, false);
     }
+    process.exit(1);
   });
 }
