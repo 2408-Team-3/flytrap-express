@@ -14,10 +14,16 @@ export interface ErrorLogData {
   path?: string;
 }
 
-export type RejectionValue = string | number | boolean | object | null | undefined;
+export type RejectionValue =
+  | string
+  | number
+  | boolean
+  | object
+  | null
+  | undefined;
 
 export interface RejectionLogData {
-  value: RejectionValue
+  value: RejectionValue;
   handled: boolean;
   timestamp: string;
   project_id: string;

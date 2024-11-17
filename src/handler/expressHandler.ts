@@ -1,9 +1,9 @@
-import { Application, Request, Response, NextFunction } from 'express';
-import { ILayer } from 'express-serve-static-core';
-import { logError } from '../logger/logError';
-import { logRejection } from '../logger/logRejection';
-import { RejectionValue } from '../types/types';
-import loggedErrors from '../shared/loggedErrors';
+import { Application, Request, Response, NextFunction } from "express";
+import { ILayer } from "express-serve-static-core";
+import { logError } from "../logger/logError";
+import { logRejection } from "../logger/logRejection";
+import { RejectionValue } from "../types/types";
+import loggedErrors from "../shared/loggedErrors";
 
 interface ExpressErrorHandlerConfig {
   wrapAsync?: boolean;
@@ -11,10 +11,13 @@ interface ExpressErrorHandlerConfig {
 
 export const setUpExpressErrorHandler = (
   app: Application,
-  config: ExpressErrorHandlerConfig = { wrapAsync: true }
+  config: ExpressErrorHandlerConfig = { wrapAsync: true },
 ): void => {
   if (config.wrapAsync) {
-    const asyncWrapper = (fn: (req: Request, res: Response, next: NextFunction) => Promise<void>) =>
+    const asyncWrapper =
+      (
+        fn: (req: Request, res: Response, next: NextFunction) => Promise<void>,
+      ) =>
       (req: Request, res: Response, next: NextFunction) => {
         Promise.resolve(fn(req, res, next)).catch(next);
       };
@@ -28,14 +31,21 @@ export const setUpExpressErrorHandler = (
     });
   }
 
-  app.use((e: Error | RejectionValue, req: Request, res: Response, next: NextFunction) => {
-    if (e instanceof Error) {
-      if (!loggedErrors.has(e)) {
-        logError(e, false, req);
+  app.use(
+    (
+      e: Error | RejectionValue,
+      req: Request,
+      res: Response,
+      next: NextFunction,
+    ) => {
+      if (e instanceof Error) {
+        if (!loggedErrors.has(e)) {
+          logError(e, false, req);
+        }
+      } else {
+        logRejection(e, false, req);
       }
-    } else {
-      logRejection(e, false, req);
-    }
-    next(e);
-  });
-}
+      next(e);
+    },
+  );
+};

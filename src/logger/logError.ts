@@ -1,13 +1,17 @@
-import axios from 'axios';
-import { Request } from 'express';
-import { parseStackTrace } from '../utils/stackTrace';
-import { readSourceFile } from '../utils/fileReader';
-import { getCodeContext } from '../utils/codeContext';
-import { getConfig } from '../config';
+import axios from "axios";
+import { Request } from "express";
+import { parseStackTrace } from "../utils/stackTrace";
+import { readSourceFile } from "../utils/fileReader";
+import { getCodeContext } from "../utils/codeContext";
+import { getConfig } from "../config";
 // import { FlytrapError } from '../utils/FlytrapError';
-import { ErrorLogData, CodeContext } from '../types/types';
+import { ErrorLogData, CodeContext } from "../types/types";
 
-export const logError = async (error: Error, handled: boolean, req?: Request): Promise<void> => {
+export const logError = async (
+  error: Error,
+  handled: boolean,
+  req?: Request,
+): Promise<void> => {
   if (!error) return;
 
   const config = getConfig();
@@ -18,7 +22,7 @@ export const logError = async (error: Error, handled: boolean, req?: Request): P
     const contexts = await Promise.all(
       stackFrames.map(async (frame) => {
         const source = await readSourceFile(frame.file);
-        
+
         if (source) {
           const context = getCodeContext(source, frame.line);
 
@@ -27,10 +31,10 @@ export const logError = async (error: Error, handled: boolean, req?: Request): P
             line: frame.line,
             column: frame.column,
             context,
-          }
+          };
         }
         return null;
-      })
+      }),
     );
     codeContexts = contexts.filter(Boolean) as CodeContext[];
   }
@@ -50,12 +54,16 @@ export const logError = async (error: Error, handled: boolean, req?: Request): P
   };
 
   try {
-    console.log('[flytrap] Sending error to backend...');
-    const response = await axios.post(`${config.apiEndpoint}/api/errors`, { data }, {
-      headers: { 'x-api-key': config.apiKey },
-    });
-    console.log('[flytrap]', response.status, response.data);
+    console.log("[flytrap] Sending error to backend...");
+    const response = await axios.post(
+      `${config.apiEndpoint}/api/errors`,
+      { data },
+      {
+        headers: { "x-api-key": config.apiKey },
+      },
+    );
+    console.log("[flytrap]", response.status, response.data);
   } catch (e) {
-    console.warn('[flytrap] Failed to send error data.', e);
+    console.warn("[flytrap] Failed to send error data.", e);
   }
-}
+};

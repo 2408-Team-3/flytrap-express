@@ -1,13 +1,13 @@
-import axios from 'axios';
-import { Request } from 'express';
-import { getConfig } from '../config';
+import axios from "axios";
+import { Request } from "express";
+import { getConfig } from "../config";
 // import { FlytrapError } from '../utils/FlytrapError';
-import { RejectionLogData, RejectionValue } from '../types/types';
+import { RejectionLogData, RejectionValue } from "../types/types";
 
 export const logRejection = async (
   value: RejectionValue,
   handled: boolean,
-  req?: Request
+  req?: Request,
 ): Promise<void> => {
   const config = getConfig();
 
@@ -21,14 +21,14 @@ export const logRejection = async (
   };
 
   try {
-    console.log('[flytrap] Sending rejection to backend...');
+    console.log("[flytrap] Sending rejection to backend...");
     const response = await axios.post(
       `${config.apiEndpoint}/api/rejections`,
       { data },
-      { headers: { 'x-api-key': config.apiKey } }
+      { headers: { "x-api-key": config.apiKey } },
     );
-    console.log('[flytrap]', response.status, response.data);
+    console.log("[flytrap]", response.status, response.data);
   } catch (e) {
-    console.warn('[flytrap] An error occurred sending rejection data.', e);
+    console.warn("[flytrap] An error occurred sending rejection data.", e);
   }
-}
+};
