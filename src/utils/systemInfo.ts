@@ -1,6 +1,6 @@
 import os from 'os';
 
-export function getRuntimeDetails() {
+export function getSystemDetails() {
   return {
     runtime: `Node.js ${process.version}`,
     os: `${os.platform()} ${os.release()}`,

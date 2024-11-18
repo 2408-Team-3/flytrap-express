@@ -2,7 +2,7 @@ import axios from "axios";
 import { Request } from "express";
 import { getConfig } from "../config";
 // import { FlytrapError } from '../utils/FlytrapError';
-import { getRuntimeDetails } from "../utils/runtimeInfo";
+import { getSystemDetails } from "../utils/systemInfo";
 import { getIpAddress } from "../utils/ipInfo";
 import { RejectionLogData, RejectionValue } from "../types/types";
 
@@ -13,7 +13,7 @@ export const logRejection = async (
 ): Promise<void> => {
   const config = getConfig();
 
-  const { runtime, os } = getRuntimeDetails();
+  const { runtime, os } = getSystemDetails();
   const ip = getIpAddress(req);
 
   const data: RejectionLogData = {

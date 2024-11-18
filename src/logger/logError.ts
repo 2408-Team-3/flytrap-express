@@ -5,7 +5,7 @@ import { readSourceFile } from "../utils/fileReader";
 import { getCodeContext } from "../utils/codeContext";
 import { getConfig } from "../config";
 // import { FlytrapError } from '../utils/FlytrapError';
-import { getRuntimeDetails } from "../utils/runtimeInfo";
+import { getSystemDetails } from "../utils/systemInfo";
 import { getIpAddress } from "../utils/ipInfo";
 import { ErrorLogData, CodeContext } from "../types/types";
 
@@ -41,7 +41,7 @@ export const logError = async (
     codeContexts = contexts.filter(Boolean) as CodeContext[];
   }
 
-  const { runtime, os } = getRuntimeDetails();
+  const { runtime, os } = getSystemDetails();
   const ip = getIpAddress(req);
 
   const data: ErrorLogData = {
