@@ -5,6 +5,8 @@ import { readSourceFile } from "../utils/fileReader";
 import { getCodeContext } from "../utils/codeContext";
 import { getConfig } from "../config";
 // import { FlytrapError } from '../utils/FlytrapError';
+import { getSystemDetails } from "../utils/systemInfo";
+import { getIpAddress } from "../utils/ipInfo";
 import { ErrorLogData, CodeContext } from "../types/types";
 
 export const logError = async (
@@ -39,6 +41,9 @@ export const logError = async (
     codeContexts = contexts.filter(Boolean) as CodeContext[];
   }
 
+  const { runtime, os } = getSystemDetails();
+  const ip = getIpAddress(req);
+
   const data: ErrorLogData = {
     error: {
       name: error.name,
@@ -51,6 +56,9 @@ export const logError = async (
     project_id: config.projectId,
     method: req?.method,
     path: req?.path,
+    ip: ip,
+    os: os,
+    runtime: runtime
   };
 
   try {
