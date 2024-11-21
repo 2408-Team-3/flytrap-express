@@ -6,6 +6,14 @@ import { getSystemDetails } from "../utils/systemInfo";
 import { getIpAddress } from "../utils/ipInfo";
 import { RejectionLogData, RejectionValue } from "../types/types";
 
+/**
+ * Logs a rejected value (e.g., from an unhandled Promise rejection) to the Flytrap backend.
+ * Includes metadata such as runtime, operating system, IP address, and request details (if available).
+ * @param value - The rejected value.
+ * @param handled - Indicates whether the rejection was handled explicitly.
+ * @param req - Optional, the Express request object for capturing request details.
+ * @returns A promise that resolves when the log is sent or catches any error during the process.
+ */
 export const logRejection = async (
   value: RejectionValue,
   handled: boolean,
@@ -21,22 +29,20 @@ export const logRejection = async (
     handled,
     timestamp: new Date().toISOString(),
     project_id: config.projectId,
-    method: req?.method,
-    path: req?.path,
-    ip: ip,
-    os: os,
-    runtime: runtime
+    method: req?.method || null,
+    path: req?.path || null,
+    ip,
+    os,
+    runtime,
   };
 
   try {
-    console.log("[flytrap] Sending rejection to backend...");
-    const response = await axios.post(
+    await axios.post(
       `${config.apiEndpoint}/api/rejections`,
       { data },
       { headers: { "x-api-key": config.apiKey } },
     );
-    console.log("[flytrap]", response.status, response.data);
-  } catch (e) {
-    console.warn("[flytrap] An error occurred sending rejection data.", e);
+  } catch {
+    return;
   }
 };

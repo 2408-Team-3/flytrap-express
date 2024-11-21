@@ -1,15 +1,20 @@
-import { Request } from 'express';
+import { Request } from "express";
 
-export function getIpAddress(req: Request | undefined): string {
+/**
+ * Extracts the IP address from an Express request object.
+ * Checks the `x-forwarded-for` header first, then falls back to `req.ip`.
+ * @param req - The Express request object. Can be undefined.
+ * @returns The extracted IP address as a string, or `null` if unavailable.
+ */
+export function getIpAddress(req: Request | undefined): string | null {
   if (!req) {
-    return "Unknown"
+    return null;
   }
 
-  const forwardedFor = req.headers['x-forwarded-for'];
+  const forwardedFor = req.headers["x-forwarded-for"];
   if (Array.isArray(forwardedFor)) {
     return forwardedFor[0];
   }
 
-  // If `x-forwarded-for` is not an array, return the first IP or fallback to `req.ip`
-  return (forwardedFor as string) || req.ip || "Unknown";
+  return (forwardedFor as string) || req.ip || null;
 }
