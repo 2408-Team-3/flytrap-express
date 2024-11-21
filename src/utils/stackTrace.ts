@@ -5,7 +5,7 @@
  * @returns An array of parsed stack frames, each containing `file`, `line`, and `column` properties,
  *          or `undefined` if the stack trace is not provided.
  */
-export const parseStackTrace = (stack: string | undefined) => {
+export const parseStackTrace = (stack: string | undefined): { file: string; line: number; column: number }[] | null => {
   if (!stack) return null;
 
   const stackLines = stack.split("\n").slice(1);

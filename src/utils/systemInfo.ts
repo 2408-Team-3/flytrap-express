@@ -6,10 +6,10 @@ import os from "os";
  * - `runtime`: The Node.js version, or `null` if unavailable.
  * - `os`: The operating system platform and release version as a string, or `null` if unavailable.
  */
-export function getSystemDetails(): {
+export const getSystemDetails = (): {
   runtime: string | null;
   os: string | null;
-} {
+} => {
   let runtime: string | null;
   let osDetails: string | null;
 
