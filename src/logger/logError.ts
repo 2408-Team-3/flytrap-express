@@ -4,11 +4,18 @@ import { parseStackTrace } from "../utils/stackTrace";
 import { readSourceFile } from "../utils/fileReader";
 import { getCodeContext } from "../utils/codeContext";
 import { getConfig } from "../config";
-// import { FlytrapError } from '../utils/FlytrapError';
 import { getSystemDetails } from "../utils/systemInfo";
 import { getIpAddress } from "../utils/ipInfo";
 import { ErrorLogData, CodeContext } from "../types/types";
 
+/**
+ * Logs an error to the Flytrap backend.
+ * Includes metadata such as stack trace, code context, runtime, OS, and IP address.
+ * @param error - The error object to log.
+ * @param handled - Indicates whether the error was explicitly handled.
+ * @param req - Optional, the Express request object for capturing request details.
+ * @returns A promise that resolves when the log is sent or catches any error during the process.
+ */
 export const logError = async (
   error: Error,
   handled: boolean,
@@ -17,6 +24,7 @@ export const logError = async (
   if (!error) return;
 
   const config = getConfig();
+
   const stackFrames = parseStackTrace(error.stack);
 
   let codeContexts: CodeContext[] = [];
@@ -54,24 +62,22 @@ export const logError = async (
     handled,
     timestamp: new Date().toISOString(),
     project_id: config.projectId,
-    method: req?.method,
-    path: req?.path,
-    ip: ip,
-    os: os,
-    runtime: runtime
+    method: req?.method || null,
+    path: req?.path || null,
+    ip,
+    os,
+    runtime,
   };
 
   try {
-    console.log("[flytrap] Sending error to backend...");
-    const response = await axios.post(
+    await axios.post(
       `${config.apiEndpoint}/api/errors`,
       { data },
       {
         headers: { "x-api-key": config.apiKey },
       },
     );
-    console.log("[flytrap]", response.status, response.data);
-  } catch (e) {
-    console.warn("[flytrap] Failed to send error data.", e);
+  } catch {
+    return;
   }
 };

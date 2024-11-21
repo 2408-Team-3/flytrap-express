@@ -5,6 +5,14 @@ import { RejectionValue } from "../types/types";
 
 let globalHandlersSet: boolean = false;
 
+/**
+ * Sets up global handlers for uncaught exceptions and unhandled promise rejections.
+ * - Captures and logs uncaught exceptions unless they are `FlytrapError`.
+ * - Captures and logs unhandled promise rejections, including both errors and other rejection values.
+ * - Ensures handlers are only set up once per process.
+ *
+ * @returns void
+ */
 export const setUpGlobalErrorHandlers = (): void => {
   if (globalHandlersSet) return;
   globalHandlersSet = true;

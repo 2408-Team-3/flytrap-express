@@ -9,6 +9,17 @@ interface ExpressErrorHandlerConfig {
   wrapAsync?: boolean;
 }
 
+/**
+ * Sets up error handling and optional async wrapper for an Express application.
+ * - Captures and logs errors and unhandled promise rejections.
+ * - Prevents duplicate logging of the same error instance.
+ * - Optionally wraps all asynchronous route handlers to catch and forward errors.
+ *
+ * @param app - The Express application instance.
+ * @param config - Configuration options for the error handler.
+ *   - `wrapAsync` (default: true): If true, wraps async route handlers to catch errors automatically.
+ * @returns void
+ */
 export const setUpExpressErrorHandler = (
   app: Application,
   config: ExpressErrorHandlerConfig = { wrapAsync: true },
