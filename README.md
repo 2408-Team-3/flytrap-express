@@ -56,7 +56,7 @@ npm install flytrap_express
     flytrap.setUpExpressErrorHandler(app);
     ```
 
-    This middleware intercepts any unhandled errors in your Express routes and log them to Flytrap.
+    This middleware intercepts any unhandled errors in your Express routes and logs them to Flytrap, along with request metadata (e.g., HTTP method and path).
 
     **Optional:** By default, the Flytrap middleware will automatically wrap your asynchronous route handlers. This ensures any unhandled promise rejections are captured and logged. To disable this behavior, pass `{ wrapAsync: false }` as an argument:
 
