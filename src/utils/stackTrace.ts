@@ -2,10 +2,11 @@
  * Parses a JavaScript stack trace string into an array of stack frame objects.
  * Extracts file name, line number, and column number from each stack frame.
  * @param stack - The stack trace as a string. Can be undefined.
- * @returns An array of parsed stack frames, each containing `file`, `line`, and `column` properties,
- *          or `undefined` if the stack trace is not provided.
+ * @returns An array of parsed stack frames, or `null` if the stack trace is undefined or invalid.
  */
-export const parseStackTrace = (stack: string | undefined): { file: string; line: number; column: number }[] | null => {
+export function parseStackTrace(
+  stack: string | undefined
+  ): { file: string; line: number; column: number }[] | null {
   if (!stack) return null;
 
   const stackLines = stack.split("\n").slice(1);

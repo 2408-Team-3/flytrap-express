@@ -14,12 +14,9 @@ export class FlytrapError extends Error {
   ) {
     super(message);
     this.name = "FlytrapError";
-
-    // Preserve stack trace from the original error if provided
     if (originalError) {
       this.stack = originalError.stack;
     }
-    // Ensure the prototype chain is properly set
     Object.setPrototypeOf(this, FlytrapError.prototype);
   }
 }

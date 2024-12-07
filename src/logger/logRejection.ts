@@ -1,7 +1,6 @@
 import axios from "axios";
 import { Request } from "express";
 import { getConfig } from "../config";
-// import { FlytrapError } from '../utils/FlytrapError';
 import { getSystemDetails } from "../utils/systemInfo";
 import { getIpAddress } from "../utils/ipInfo";
 import { RejectionLogData, RejectionValue } from "../types/types";

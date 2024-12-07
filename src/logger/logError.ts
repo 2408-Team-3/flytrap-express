@@ -24,7 +24,6 @@ export const logError = async (
   if (!error) return;
 
   const config = getConfig();
-
   const stackFrames = parseStackTrace(error.stack);
 
   let codeContexts: CodeContext[] = [];
@@ -32,10 +31,8 @@ export const logError = async (
     const contexts = await Promise.all(
       stackFrames.map(async (frame) => {
         const source = await readSourceFile(frame.file);
-
         if (source) {
           const context = getCodeContext(source, frame.line);
-
           return {
             file: frame.file,
             line: frame.line,
@@ -73,9 +70,7 @@ export const logError = async (
     await axios.post(
       `${config.apiEndpoint}/api/errors`,
       { data },
-      {
-        headers: { "x-api-key": config.apiKey },
-      },
+      { headers: { "x-api-key": config.apiKey } },
     );
   } catch {
     return;
