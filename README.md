@@ -8,6 +8,8 @@ This guide will walk you through setting up the Flytrap Express SDK in your proj
 
 To learn more about Flytrap, check out our [case study](https://getflytrap.github.io/).
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 ## 🚀 Getting Started
 
 To start using Flytrap in your project:
@@ -23,6 +25,8 @@ Install the Flytrap Express SDK via npm:
 ```bash
 npm install flytrap_express
 ```
+
+For more details about the package, visit the [Flytrap Express SDK on npm](https://www.npmjs.com/package/flytrap_express).
 
 ## 🛠️ Usage
 
