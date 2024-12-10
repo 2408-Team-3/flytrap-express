@@ -24,6 +24,8 @@ Install the Flytrap Express SDK via npm:
 npm install flytrap_express
 ```
 
+For more details about the package, visit the [Flytrap Express SDK on npm](https://www.npmjs.com/package/flytrap_express).
+
 ## 🛠️ Usage
 
 1. **Initialize Flytrap**: In your main application file (e.g., app.js or index.js), import the Flytrap module and initialize it with your project credentials:
